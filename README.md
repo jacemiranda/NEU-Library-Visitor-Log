@@ -4,7 +4,7 @@ This project was developed for the **Software Engineering 2** course to moderniz
 
 Built with **React 19** and **Firebase**, the system allows students and faculty to seamlessly log their library visits using their institutional Google accounts, while providing administrators with a powerful dashboard to monitor and export visitor data.
 
-**[Live Demo: https://neu-library-visitor-log-rust.vercel.app/]**
+**Live Demo: https://neu-library-visitor-log-rust.vercel.app/**
 
 ## 🚀 Features
 
