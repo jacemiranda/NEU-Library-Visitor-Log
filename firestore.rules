@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required, email format)
+    //   - fullName: string (optional)
+    //   - role: string (enum: Student, Faculty, Employee, Admin)
+    //   - college_office: string (optional)
+    //   - isSetupComplete: boolean (required)
+    //   - isBlocked: boolean (required)
+    //
+    // Collection: logs
+    // Document ID: {logId}
+    // Fields:
+    //   - uid: string (required)
+    //   - timestamp: timestamp (required)
+    //   - checkOutTime: timestamp (optional)
+    //   - reason: string (required)
+    //   - userEmail: string (required)
+    //   - college_office: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin') ||
+        (request.auth.token.email == "m.carl4243@gmail.com" && request.auth.token.email_verified == true) ||
+        (request.auth.token.email == "jermainecarl.miranda@neu.edu.ph" && request.auth.token.email_verified == true) ||
+        (request.auth.token.email == "jcesperanza@neu.edu.ph" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isNotBlocked() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isBlocked == false;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role', 'isSetupComplete', 'isBlocked']) &&
+             data.uid is string && data.uid.size() < 128 &&
+             data.email is string && data.email.size() < 256 &&
+             data.role is string && data.role in ['Student', 'Faculty', 'Employee', 'Admin'] &&
+             (!('fullName' in data) || (data.fullName is string && data.fullName.size() < 256)) &&
+             (!('college_office' in data) || (data.college_office is string && data.college_office.size() < 256)) &&
+             data.isSetupComplete is bool &&
+             data.isBlocked is bool;
+    }
+
+    function isValidLog(data) {
+      return data.keys().hasAll(['uid', 'timestamp', 'reason', 'userEmail', 'college_office']) &&
+             data.uid is string && data.uid.size() < 128 &&
+             data.timestamp is timestamp &&
+             (data.checkOutTime == null || data.checkOutTime is timestamp) &&
+             data.reason is string && data.reason.size() < 512 &&
+             data.userEmail is string && data.userEmail.size() < 256 &&
+             data.college_office is string && data.college_office.size() < 256;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && isValidUser(request.resource.data) && 
+                      (request.resource.data.role != 'Admin' || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (
+                      (isOwner(uid) && 
+                        (request.resource.data.role == resource.data.role || isAdmin()) && 
+                        (request.resource.data.isBlocked == resource.data.isBlocked || isAdmin())
+                      ) || isAdmin()
+                    );
+    }
+
+    match /logs/{logId} {
+      // Allow users to read their own logs, admins to read all, 
+      // and all authenticated users to read active logs (for occupancy counting)
+      allow read: if isAuthenticated() && (
+        resource.data.uid == request.auth.uid || 
+        isAdmin() || 
+        resource.data.checkOutTime == null
+      );
+      allow create: if isAuthenticated() && isNotBlocked() && isValidLog(request.resource.data) && request.resource.data.uid == request.auth.uid;
+      allow update: if (isAuthenticated() && (resource.data.uid == request.auth.uid || isAdmin())) || 
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['checkOutTime']) && 
+                       resource.data.checkOutTime == null);
+      allow delete: if isAdmin();
+    }
+  }
+}

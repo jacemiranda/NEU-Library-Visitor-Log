@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-paper: #ffffff;
+  --color-ink: #0f172a;
+  --color-library: #2563eb;
+  --color-accent: #3b82f6;
+  
+  --color-dark-bg: #020617; /* Deep slate/blue */
+  --color-dark-card: #0f172a; /* Slightly lighter deep blue */
+  --color-dark-border: #1e293b;
+  --color-dark-text: #f8fafc;
+  --color-dark-muted: #94a3b8;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-ink antialiased font-sans transition-colors duration-300;
+  }
+  
+  .dark, .dark body {
+    @apply bg-dark-bg text-dark-text;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-sans font-bold tracking-tight;
+  }
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl shadow-slate-200/50 transition-all duration-300;
+}
+
+.dark .glass-card {
+  @apply bg-dark-card/80 border-dark-border shadow-none;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Fix QR Scanner Video */
+#reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 1rem;
+}
+
+#reader {
+  border: none !important;
+}
+
+#reader img {
+  display: none !important;
+}

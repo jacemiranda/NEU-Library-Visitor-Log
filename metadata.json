@@ -1,0 +1,5 @@
+{
+  "name": "NEU Library Visitor Log",
+  "description": "A comprehensive visitor logging system for NEU Library with QR code check-in/out and admin analytics.",
+  "requestFramePermissions": ["camera"]
+}

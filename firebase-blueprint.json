@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "fullName": { "type": "string", "description": "User's full name" },
+        "role": { "type": "string", "enum": ["Student", "Faculty", "Employee", "Admin"], "description": "User role" },
+        "college_office": { "type": "string", "description": "Specific College or Office" },
+        "isSetupComplete": { "type": "boolean", "description": "Whether the user has completed initial profiling" },
+        "isBlocked": { "type": "boolean", "description": "Whether the user is blocked from checking in" }
+      },
+      "required": ["uid", "email", "isSetupComplete", "isBlocked"]
+    },
+    "Log": {
+      "title": "Log",
+      "description": "Visitor log entry",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User UID" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Check-in time" },
+        "checkOutTime": { "type": "string", "format": "date-time", "description": "Check-out time" },
+        "reason": { "type": "string", "description": "Purpose of visit" },
+        "userEmail": { "type": "string", "format": "email", "description": "User email" },
+        "college_office": { "type": "string", "description": "User's college or office" }
+      },
+      "required": ["uid", "timestamp", "reason", "userEmail", "college_office"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/logs/{logId}": {
+      "schema": "Log",
+      "description": "Visitor logs"
+    }
+  }
+}
