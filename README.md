@@ -72,16 +72,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to view the 
 *   `src/types.ts` - TypeScript interfaces for User Profiles and Visitor Logs.
 *   `firestore.rules` - Security rules for protecting visitor data.
 
-## 🌐 Deployment (Vercel)
-
-This project is optimized for deployment on Vercel. Ensure all `VITE_` environment variables are added to your Vercel project settings.
-
-### ⚠️ Troubleshooting: `auth/unauthorized-domain`
-If you see a "Login failed: Firebase: Error (auth/unauthorized-domain)" error on Vercel:
-1. Go to [Firebase Console](https://console.firebase.google.com/) and select project `gen-lang-client-0006318267`.
-2. Navigate to **Authentication** > **Settings** > **Authorized domains**.
-3. Click **Add domain** and paste your Vercel URL (e.g., `your-app.vercel.app`).
-4. Click **Add** and wait ~30 seconds.
 
 ## 🛡️ Security Rules
 
